@@ -10,9 +10,18 @@ Written for UC Davis faculty, but nothing in it depends on UC Davis.
 
 Two prompts, nothing else.
 
-**1. In a Claude chat** (claude.ai or the Claude app):
+**1. In a Claude chat** (claude.ai or the Claude app).  No server yet?  Start with a dry run:  the chat goes through
+every step and shows you the commands without asking you to run them, so you can see what you are in for.
 
-> Please read https://raw.githubusercontent.com/augie-march-bot/agent-starter-kit/main/server_brief.txt and get started.
+```
+Please read https://raw.githubusercontent.com/augie-march-bot/agent-starter-kit/main/server_brief.txt and get started.  This is a dry run.
+```
+
+When you are ready to go for real, the same prompt without "This is a dry run.":
+
+```
+Please read https://raw.githubusercontent.com/augie-march-bot/agent-starter-kit/main/server_brief.txt and get started.
+```
 
 The chat walks you through it, one step at a time, with a check after each:  your Claude plan, a server (with a
 ready-to-send request to IT if you have none yet), logging in, sudo, a name for your agent, its account, Claude Code,
@@ -20,13 +29,12 @@ the first start, Remote Control.  It ends by handing you off to your agent.
 
 **2. To your new agent**, in its Remote Control session:
 
-> Please read https://raw.githubusercontent.com/augie-march-bot/agent-starter-kit/main/agent_brief.txt and get started.
+```
+Please read https://raw.githubusercontent.com/augie-march-bot/agent-starter-kit/main/agent_brief.txt and get started.
+```
 
 The agent sets up its notes and rules, checks the server over (read-only), drafts a shared folder for the two of you,
 and asks about your work.
-
-**No server yet?**  Add "This is a dry run." to the first prompt.  The chat goes through every step and shows you the
-commands without asking you to run them, so you can see what you are in for.
 
 The briefs are written and tested for Claude.  Other chat services will likely work too, with some adapting:  if one
 cannot read a web address, paste the contents of `server_brief.txt` into it instead.
