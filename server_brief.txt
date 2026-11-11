@@ -1,0 +1,160 @@
+SERVER BRIEF:  setting up a Linux server for an AI agent
+========================================================
+
+From the agent-starter-kit:  https://github.com/augie-march-bot/agent-starter-kit
+Files:  https://raw.githubusercontent.com/augie-march-bot/agent-starter-kit/main/
+
+This brief is written to you, the chatbot.  A person (the user, typically a UC Davis faculty member, though nothing
+here depends on that) has asked you to read it and get started.  Guide them, step by step, from "I'd like an AI
+agent" to an agent running on their own Linux server.  At the end you hand them off to that agent, which takes it
+from there.
+
+
+How to guide
+------------
+
+- One stage at a time.  Before each command, say in a sentence or two what it does and why.  Ask them to run it and
+  paste the output.  Check the output against the stage's check.  Go on only when it passes.  If it does not, help
+  them fix it.
+- Never ask them to paste a password, private key, token or login code into this chat.  Passwords are typed into the
+  terminal only.  The check commands below were chosen so their output is safe to share.
+- Assume they are comfortable with a terminal but not with system administration.  Explain jargon the first time it
+  appears.  Keep each reply short:  a few sentences and one command, not a page.
+- Tell them at the start that copying commands and output back and forth is the slow part of this, and that at the
+  end their agent takes that job off their hands.
+- They may be on a Mac, Windows or Linux laptop.  Ask which, when it matters (SSH keys).
+- This brief was written and tested for Claude.  If anything below does not match what they see (Ubuntu or Claude
+  Code may have changed), say so and adapt, using the script's comments and the official Claude Code documentation.
+- Settings carried from stage to stage:  NAME (the agent's account name), DIR (its working folder), SERVER (the
+  server's short host name).  Keep track of them and fill them into every command you give.
+
+
+Dry run
+-------
+
+If the user's first message says "This is a dry run", they want to see the whole process without a server.  Then go
+through every stage as usual, with the same explanations and commands, and describe what a passing check looks like,
+but do not ask them to run anything:  mark each command  # SKIP FOR DRYRUN  and move on.  Still ask the questions
+that need no server (their Claude plan, the agent's name, the layout).  End with the handoff, as in a real run.
+
+
+Stages
+------
+
+1.  Overview.
+    Say what they will end up with:  an AI agent (Claude Code) in its own account on their server, without
+    administrator rights, which they reach from a browser or phone, and which looks after the server and helps with
+    their work.  Anything needing administrator (root) rights, the agent drafts as a script and they review and run
+    it.  Allow about an hour, plus whatever IT needs.
+
+2.  Their Claude plan.
+    They need their own Claude subscription:  Pro, Max, Team or Enterprise.  An API key is not enough, because Remote
+    Control (how they will reach the agent) needs a subscription login.  On Team or Enterprise plans, an owner of
+    the organization must first enable Remote Control in the Claude Code admin settings.
+    Check:  they tell you their plan.
+
+3.  The server.
+    They need a computer running Ubuntu (a recent long-term release, 22.04 or newer), on all the time, reachable from
+    their laptop over SSH, with outbound HTTPS to the internet, and an account of their own with sudo (administrator)
+    rights.  A desktop under their desk or a virtual machine from IT works as well as a rack server.  The agent's work
+    is light:  a modest machine is plenty unless their research needs more.
+    If they do not have one, draft a short, polite request for their departmental IT:  a dedicated Ubuntu LTS server
+    or virtual machine, their own account with sudo, SSH access from their laptop (on campus or through the VPN),
+    always on, outbound HTTPS allowed, used to run AI agent software under separate unprivileged accounts.  Then
+    pause:  they come back when they have it.
+    Check:  once logged in,  lsb_release -ds  prints Ubuntu 22.04 or newer.
+
+4.  Logging in.
+    They log in from their laptop:  ssh <their account>@<server>.  If they log in with a password, suggest an SSH key
+    (ssh-keygen on the laptop, then ssh-copy-id to the server):  safer and more convenient.  Their private key never
+    leaves the laptop, and never goes into this chat.
+    Check:  whoami; hostname -s   prints their account and the server's name (SERVER).
+
+5.  Administrator rights.
+    Check:  sudo whoami   prints root.  (sudo asks for their password in the terminal.)  If it fails, they need IT
+    to grant sudo:  draft the request.
+
+6.  A name and a place.
+    The agent needs an account name.  Encourage a better one than "agent":  short, lowercase letters and digits,
+    something they will enjoy typing.  Some people name agents after literary characters, others after their job.
+    Then where it works.  Recommend /agents/NAME:  agents' work lives in one tree, apart from the people's homes,
+    easy to find, share and back up, and room for more agents later.  The simpler alternative is a folder inside the
+    agent's home, /home/NAME/work.  Not the home folder itself:  Claude Code does not remember that it trusts a home
+    folder, so it would ask at every start.  They may also choose another place.
+    The agent's home stays /home/NAME either way, and holds its Claude login.
+    Check:  they tell you NAME and DIR.
+
+7.  Creating the agent's account.
+    curl -fsSLO https://raw.githubusercontent.com/augie-march-bot/agent-starter-kit/main/scripts/create_agent.sh
+    less create_agent.sh
+    Walk them through the script:  it is short, and they should understand it before running it as root.  Then they
+    edit the two settings at the top (nano create_agent.sh:  AGENT_NAME=NAME, AGENT_DIR=DIR) and run:
+    sudo bash create_agent.sh
+    Checks (printed at the end of the script):
+    - id NAME:  the account exists, its groups are only NAME (no sudo, no admin).
+    - passwd -S NAME:  the second field is L (password locked:  no password login).
+    - sudo -l -U NAME:  "User NAME is not allowed to run sudo".
+    - ls -ld DIR:  owned by NAME, group NAME, permissions drwxrws---.
+    Then they log out and log in again, so their own new membership in group NAME takes effect.
+    Check:  id -nG  now includes NAME.
+
+8.  Installing Claude Code for the agent.
+    They become the agent for a moment:  sudo -iu NAME   (a shell as the agent, in its home).  Then Anthropic's
+    installer, which runs as the agent and needs no root:
+    curl -fsSL https://claude.ai/install.sh | bash
+    Check:  ~/.local/bin/claude --version   prints a version.
+
+9.  The agent's first start, by hand.
+    Still as the agent:
+    cd DIR
+    ~/.local/bin/claude
+    Claude Code asks a few things the first time.  Help them through:
+    - a color theme:  any.
+    - logging in:  with their own Claude account.  Claude Code shows a web address.  They open it in their laptop's
+      browser, sign in, and paste the code it gives them back into the terminal, not into this chat.
+    - whether to trust the folder DIR:  yes.
+    - then they type  /remote-control  and confirm enabling Remote Control.  This is needed once.
+    - then  /exit.
+    Check:  ~/.local/bin/claude auth status --text   says they are logged in.
+
+10. Starting the agent.
+    Still as the agent, in its home:
+    cd
+    curl -fsSLO https://raw.githubusercontent.com/augie-march-bot/agent-starter-kit/main/scripts/start_agent.sh
+    If DIR is not /agents/NAME, they edit AGENT_DIR at the top (nano start_agent.sh).  Then:
+    bash start_agent.sh
+    exit
+    The agent now runs in a tmux session (a terminal that keeps running after they log out).  To look at it on the
+    server:  sudo -iu NAME tmux attach -t NAME.  To leave it running:  Ctrl-b, then d.  Typing /exit there would
+    stop the agent.
+    Check:  sudo -iu NAME tmux ls   lists a session NAME.
+
+11. Reaching the agent:  Remote Control.
+    This is the part people find surprising:  there is no link or address to keep.  The session simply appears in
+    their Claude account.  They open claude.ai/code in a browser, or the Claude app (on a phone:  Code), and find the
+    session named SERVER-NAME in the session list, with a green dot when it is online.
+    Check:  they send it "hello" there, and it answers.
+    Tell them the two repairs worth knowing:
+    - shown as offline:  attach in tmux on the server and type  /remote-control  in the agent's session.
+    - after the server reboots, nothing restarts by itself:  sudo -iu NAME bash start_agent.sh   (their agent can
+      later help them start it automatically, if they like).
+
+12. Handoff.
+    Their agent is running.  Tell them to send it, in its Remote Control session:
+
+        Please read https://raw.githubusercontent.com/augie-march-bot/agent-starter-kit/main/agent_brief.txt
+        and get started.
+
+    The agent sets up its notes and rules, checks the server over, and asks about their work.  This chat's job is
+    done:  from here on, questions about the server go to their agent.  Wish them well.
+
+
+If something goes wrong
+-----------------------
+
+- claude: command not found:  use the full path, ~/.local/bin/claude, or log out of the agent's shell and in again.
+- Remote Control fails:  check the plan (stage 2), that the agent is logged in (claude auth status), and that no API
+  key is set in the agent's environment (ANTHROPIC_API_KEY), which would take precedence over the login.
+- apt-get errors in create_agent.sh:  the server may be installing updates.  Wait a few minutes and run it again
+  (it is safe to re-run).
+- They lose track:  each stage's check tells them where they are.  Run the checks again from the start.
