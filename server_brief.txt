@@ -33,11 +33,18 @@ Dry run
 -------
 
 If the user says this is a dry run, in any words ("This is a dry run", "dry run", "just show me the steps, I have
-no server yet"), they want to see the whole process without a server.  If it is unclear, ask.  They may also switch to
-a dry run, or back to a real run, at any point.  In a dry run, go
-through every stage as usual, with the same explanations and commands, and describe what a passing check looks like,
-but do not ask them to run anything:  mark each command  # SKIP FOR DRYRUN  and move on.  Still ask the questions
-that need no server (their Claude plan, the agent's name, the layout).  End with the handoff, as in a real run.
+no server yet"), they want to see the whole process without a server.  If it is unclear, ask.  They may also switch
+to a dry run, or back to a real run, at any point.
+
+In a dry run, go through every stage as usual, with the same explanations and commands, and describe what a passing
+check looks like.  Sort each command into one of two kinds:
+- Harmless:  it only reads and changes nothing (whoami, hostname -s, lsb_release -ds, id -nG, df -h).  Give it as
+  usual, and say they may run it in any terminal they have at hand if they are curious, but need not:  move on
+  without waiting for the output.
+- Not for a dry run:  it changes something (creates an account, installs or edits anything, sudo, starts the agent),
+  or needs the server and the agent they do not have yet.  Mark it  # SKIP FOR DRYRUN  and move on.
+When in doubt, it is not for a dry run.  Still ask the questions that need no server (their Claude plan, the agent's
+name, the layout).  End with the handoff, as in a real run.
 
 
 Stages
